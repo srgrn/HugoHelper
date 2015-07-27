@@ -1,0 +1,4 @@
+[
+    {  "keys": ["super+b", "super+c"], "command": "hugo_helper_insert_summary_break" },
+    {  "keys": ["super+b", "super+p"], "command": "hugo_helper_publish_post" }
+]

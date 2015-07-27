@@ -1,0 +1,4 @@
+[
+    { "caption": "Hugo Helper: Add Summary break", "command": "hugo_helper_insert_summary_break" },
+    { "caption": "Hugo Helper: Publish", "command": "hugo_helper_publish_post" }
+]

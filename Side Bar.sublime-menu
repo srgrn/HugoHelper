@@ -1,0 +1,8 @@
+[
+    {
+        "caption": "New Hugo Post Here",
+        "id": "New Post Here",
+        "command": "hugo_helper_add_content",
+        "args": {"paths": []}
+    }
+]

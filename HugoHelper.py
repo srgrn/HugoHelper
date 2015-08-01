@@ -1,6 +1,9 @@
 import sublime
 import sublime_plugin
 from datetime import datetime
+import os
+
+DEFAULT_CONTENTS_DIR = "content"
 
 
 class HugoHelperPublishPostCommand(sublime_plugin.TextCommand):
@@ -30,4 +33,29 @@ class HugoHelperInsertSummaryBreakCommand(sublime_plugin.TextCommand):
         for region in self.view.sel():
             if region.empty():
                 line = self.view.line(region)
-                self.view.insert(edit,line.begin(), '<!--more-->\n')
+                self.view.insert(edit, line.begin(), '<!--more-->\n')
+
+
+class HugoHelperAddContentCommand(sublime_plugin.WindowCommand):
+
+    def run(self, paths=[], name=""):
+        import functools
+        window = sublime.active_window()
+        window.run_command('hide_panel')
+        window.show_input_panel("post path:", name, functools.partial(self.on_done, paths), None, None)
+
+    def on_done(self, paths, name):
+        path = None
+        cwd = None
+        if len(paths) > 0 and DEFAULT_CONTENTS_DIR in paths[0]:
+            splitted_paths = paths[0].split(os.path.sep)
+            path = os.path.join("", *splitted_paths[splitted_paths.index(DEFAULT_CONTENTS_DIR) + 1:])
+            cwd = os.path.join("/", *splitted_paths[:splitted_paths.index(DEFAULT_CONTENTS_DIR)])
+        if not name.endswith(".md"):
+            name += ".md"
+        import subprocess
+        target = os.path.join(path, name)
+        args = ["hugo", "new", target]
+        print (args, cwd)
+        subprocess.Popen(args, cwd=cwd)
+        return

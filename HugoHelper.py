@@ -51,6 +51,8 @@ class HugoHelperAddContentCommand(sublime_plugin.WindowCommand):
             print ("You must supply a name")
             return
         if len(paths) > 0 and DEFAULT_CONTENTS_DIR in paths[0]:
+            if not os.path.isdir(paths[0]):
+                paths[0] = os.path.dirname(paths[0])
             splitted_paths = paths[0].split(os.path.sep)
             path = os.path.join("", *splitted_paths[splitted_paths.index(DEFAULT_CONTENTS_DIR) + 1:])
             cwd = os.path.join("/", *splitted_paths[:splitted_paths.index(DEFAULT_CONTENTS_DIR)])

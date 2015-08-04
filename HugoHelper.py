@@ -57,6 +57,14 @@ class HugoHelperAddContentCommand(sublime_plugin.WindowCommand):
         if not name.endswith(".md"):
             name += ".md"
         import subprocess
+        index = 1
+        import re
+        while os.path.exists(os.path.join(paths[0], name)):
+            exp = r'_\d*.md$'
+            if index == 1:
+                exp = r'.md$'
+            name = re.sub(exp, '_' + str(index) + '.md', name)
+            index += 1
         target = os.path.join(path, name)
         args = ["hugo", "new", target]
         print (args, cwd)

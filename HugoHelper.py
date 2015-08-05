@@ -22,9 +22,20 @@ class HugoHelperPublishPostCommand(sublime_plugin.TextCommand):
             print (now)
             self.view.replace(edit, region, 'date = "' + now.strftime("%Y-%m-%dT%H:%M:%S") + tz)
 
+    def fix_title(self, edit):
+        region = self.view.find('title\s=\s.*$', 0)
+        if not region.empty():
+            current = self.view.substr(region)
+            title = current.split("=")[1].strip().replace('"', '')
+            if " " not in title:
+                title = " ".join(title.split('_'))
+                title = title.capitalize()
+                self.view.replace(edit, region, 'title = "' + title + '"')
+
     def run(self, edit):
         self.set_draft_status(edit, 'false')
         self.set_date(edit)
+        self.fix_title(edit)
 
 
 class HugoHelperInsertSummaryBreakCommand(sublime_plugin.TextCommand):

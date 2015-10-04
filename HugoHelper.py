@@ -6,6 +6,10 @@ import os
 DEFAULT_CONTENTS_DIR = "content"
 
 
+def plugin_loaded():
+    print('HugoHelper plugin_loaded')
+    settings = sublime.load_settings('Hugo Helper.sublime-settings')
+
 class HugoHelperPublishPostCommand(sublime_plugin.TextCommand):
 
     def set_draft_status(self, edit, target):
@@ -58,6 +62,8 @@ class HugoHelperAddContentCommand(sublime_plugin.WindowCommand):
     def on_done(self, paths, name):
         path = None
         cwd = None
+        settings = sublime.load_settings('Hugo Helper.sublime-settings')
+        hugoPath = settings.get('HugoPath','hugo')
         if name == "" or name is None:
             print ("You must supply a name")
             return
@@ -79,7 +85,8 @@ class HugoHelperAddContentCommand(sublime_plugin.WindowCommand):
             name = re.sub(exp, '_' + str(index) + '.md', name)
             index += 1
         target = os.path.join(path, name)
-        args = ["hugo", "new", target]
+        
+        args = [hugoPath, "new", target]
         print (args, cwd)
         subprocess.Popen(args, cwd=cwd)
         return

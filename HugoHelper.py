@@ -1,7 +1,9 @@
+import os
+from datetime import datetime
+
+import ast
 import sublime
 import sublime_plugin
-from datetime import datetime
-import os
 
 DEFAULT_CONTENTS_DIR = "content"
 
@@ -9,6 +11,7 @@ DEFAULT_CONTENTS_DIR = "content"
 def plugin_loaded():
     print('HugoHelper plugin_loaded')
     settings = sublime.load_settings('Hugo Helper.sublime-settings')
+
 
 class HugoHelperPublishPostCommand(sublime_plugin.TextCommand):
 
@@ -63,7 +66,7 @@ class HugoHelperAddContentCommand(sublime_plugin.WindowCommand):
         path = None
         cwd = None
         settings = sublime.load_settings('Hugo Helper.sublime-settings')
-        hugoPath = settings.get('HugoPath','hugo')
+        hugoPath = settings.get('HugoPath', 'hugo')
         if name == "" or name is None:
             print ("You must supply a name")
             return
@@ -85,8 +88,49 @@ class HugoHelperAddContentCommand(sublime_plugin.WindowCommand):
             name = re.sub(exp, '_' + str(index) + '.md', name)
             index += 1
         target = os.path.join(path, name)
-        
+
         args = [hugoPath, "new", target]
         print (args, cwd)
         subprocess.Popen(args, cwd=cwd)
         return
+
+
+class HugoHelperInsertCategory(sublime_plugin.TextCommand):
+    def update_categories(self, edit, categories):
+        region = self.view.find('categories\s=\s.*$', 0)
+        if not region.empty():
+            # self.view.run_command("insert", {"characters": str(categories)})
+            self.view.replace(edit, region, 'categories = {}'.format(str(categories).replace("'", '"')))
+
+    def run(self, edit, categories=None):
+        if categories is None:
+            return
+        self.update_categories(edit, categories)
+        return
+
+
+class HugoHelperAddCategories(sublime_plugin.TextCommand):
+
+    def get_categories(self, edit):
+        region = self.view.find('categories\s=\s.*$', 0)
+        if not region.empty():
+            current = self.view.substr(region)
+            categories = ast.literal_eval("".join(current.split("=")[1:]).lstrip().strip())
+            return categories
+        return []
+
+    def on_done(self, edit, new_category):
+        categories = self.get_categories(edit)
+        print (new_category, categories)
+        categories.append(new_category)
+        categories = list(set(categories))  # remove duplicates
+        # self.update_categories(edit,categories)
+        self.view.run_command('hugo_helper_insert_category', {"categories": categories})
+        return
+
+    def run(self, edit):
+        import functools
+        new_category = ""
+        window = sublime.active_window()
+        window.run_command('hide_panel')
+        window.show_input_panel("category name:", new_category, functools.partial(self.on_done, edit), None, None)
